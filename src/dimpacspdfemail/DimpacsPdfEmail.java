@@ -7,24 +7,11 @@ package dimpacspdfemail;
 
 import Email.EmailSenderService;
 import Pdf.PdfCopy;
-import com.google.gson.Gson;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import modelos.Configuracion;
 import modelos.Email;
 import modelos.PdfEmail;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import servicios.FirebaseServicios;
 import servicios.PdfEmailServicio;
 
 /**
@@ -36,8 +23,9 @@ public class DimpacsPdfEmail {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args){
-        PdfEmailServicio pdfEmailServicio = new PdfEmailServicio();
+    public static void main(String[] args) throws IOException{
+        firebase();
+        /*PdfEmailServicio pdfEmailServicio = new PdfEmailServicio();
         Configuracion[] listConfiguracion = pdfEmailServicio.getConfiguracionEmail();
         
         PdfCopy pdfCopy = new PdfCopy();
@@ -57,8 +45,13 @@ public class DimpacsPdfEmail {
                 }
 
             }
-        } 
+        } */
             
+    }
+    
+    private static void firebase() throws IOException{
+        FirebaseServicios firebaseServicios = new FirebaseServicios();
+        firebaseServicios.conectar();
     }
 
 }
