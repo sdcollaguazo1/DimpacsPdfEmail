@@ -16,8 +16,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import modelos.Configuracion;
 import modelos.PdfEmail;
-import org.json.JSONArray;
-import org.json.JSONObject;
+
 
 /**
  *
