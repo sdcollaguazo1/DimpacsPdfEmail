@@ -61,6 +61,12 @@ public class EmailSenderService {
             String htmlText = "<H1>" + email.getSubject() + "</H1>"
                     + "<img src=\"cid:image\">"
                     + "<p>" + email.getMensaje() + "</p>";
+            
+            //Agregar enlace de firebase en caso de subir
+            if(pdfEmail.isSubirFirebase()){
+                htmlText = htmlText
+                        +"<a href=\""+pdfEmail.getUrlArchivo()+"\" target=\"_blank\">Descargar informe</a>";                        
+            }
             messageBodyPart.setContent(htmlText, "text/html");
             // Añadimos el hml al multipart
             multipart.addBodyPart(messageBodyPart);
@@ -73,14 +79,15 @@ public class EmailSenderService {
             // añadimos la imagen al multipart
             multipart.addBodyPart(imagenBodyPart);
 
-            //Tercera parte adjuntamos el pdf
-            BodyPart pdfBodyPart = new MimeBodyPart();
-            DataSource source = new FileDataSource(pdfEmail.getRutaArchivo());
-            pdfBodyPart.setDataHandler(new DataHandler(source));
-            pdfBodyPart.setFileName(pdfEmail.getNombreArchivo());
-            //añadimos el pdf al multipart
-            multipart.addBodyPart(pdfBodyPart);
-
+           if (!pdfEmail.isSubirFirebase()) {            
+                //Tercera parte adjuntamos el pdf
+                BodyPart pdfBodyPart = new MimeBodyPart();
+                DataSource source = new FileDataSource(pdfEmail.getRutaArchivo());
+                pdfBodyPart.setDataHandler(new DataHandler(source));
+                pdfBodyPart.setFileName(pdfEmail.getNombreArchivo());
+                //añadimos el pdf al multipart
+                multipart.addBodyPart(pdfBodyPart);
+            }
             // Agregamos el multipart al contenido del mensaje
             message.setContent(multipart);
 
@@ -92,19 +99,22 @@ public class EmailSenderService {
             transport.sendMessage(message, message.getAllRecipients());
             transport.close();
         } catch (NoSuchProviderException ex) {
-            pdfEmail.setInformeEstado("Error al enviar el correo: " + ex.getMessage());
+            pdfEmail.setInformeEstado("Error");
+            pdfEmail.setError("Error al enviar el correo: " + ex.getMessage());
             pdfEmailServicio.cambiarEstatusInforme(pdfEmail);
             System.out.println("NoSuchProviderException: " + ex.getMessage());
             return;
 
         } catch (AuthenticationFailedException ex) {
-            pdfEmail.setInformeEstado("Error al enviar el correo: " + ex.getMessage());
+            pdfEmail.setInformeEstado("Error");
+            pdfEmail.setError("Error al enviar el correo: " + ex.getMessage());
             pdfEmailServicio.cambiarEstatusInforme(pdfEmail);
             System.out.println("AuthenticationFailedException: " + ex.getMessage());
             return;
 
         } catch (MessagingException ex) {
-            pdfEmail.setInformeEstado("Error al enviar el correo: " + ex.getMessage());
+            pdfEmail.setInformeEstado("Error");
+            pdfEmail.setError("Error al enviar el correo: " + ex.getMessage());
             pdfEmailServicio.cambiarEstatusInforme(pdfEmail);
             System.out.println("MessagingException: " + ex.getMessage());
             return;

@@ -6,25 +6,19 @@
 package servicios;
 
 import com.google.auth.oauth2.GoogleCredentials;
-import com.google.cloud.firestore.QuerySnapshot;
+import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.Bucket;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.cloud.FirestoreClient;
 import com.google.firebase.cloud.StorageClient;
-import com.google.firebase.database.DatabaseReference;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import modelos.Paciente;
+import modelos.ConfiguracionFirebase;
+import modelos.PdfEmail;
 
 /**
  *
@@ -32,66 +26,63 @@ import modelos.Paciente;
  */
 public class FirebaseServicios {
 
-    public void conectar() throws IOException {
+    private FileInputStream refreshToken;
 
-        FileInputStream refreshToken = new FileInputStream("C:\\Temp\\uploads\\firebase\\keyFirebase.json");
+    private FirebaseOptions options;
 
-        FirebaseOptions options = FirebaseOptions.builder()
-                .setCredentials(GoogleCredentials.fromStream(refreshToken))
-                .setDatabaseUrl("https://dimpacs.firebaseio.com")
-                .setStorageBucket("dimpacs.appspot.com")
-                .build();
+    private FirebaseApp defaultApp;
 
-        FirebaseApp defaultApp = FirebaseApp.initializeApp(options);
+    private Bucket bucket;
 
-        System.out.println(defaultApp.getName());
+    private InputStream testFile;
 
-        // Retrieve services by passing the defaultApp variable...
-        FirebaseAuth defaultAuth = FirebaseAuth.getInstance(defaultApp);
-        FirebaseDatabase defaultDatabase = FirebaseDatabase.getInstance(defaultApp);
+    private Blob blob;
 
-// ... or use the equivalent shorthand notation
-        defaultAuth = FirebaseAuth.getInstance();
-        defaultDatabase = FirebaseDatabase.getInstance();
-        
-        
-        Bucket bucket = StorageClient.getInstance().bucket();
-        
-        InputStream testFile = new FileInputStream("C:\\Temp\\uploads\\informes\\informe.pdf");
-            String blobString = "paciente/" + "informe.pdf";        
-
-        bucket.create(blobString, testFile , Bucket.BlobWriteOption.userProject("dimpacs"));
-        /*DatabaseReference ref = defaultDatabase.getReference();
-
-        DatabaseReference usersRef = ref.child("pacientes");
-
-        
-        Map<String, Paciente> users = new HashMap<>();
-        users.put("alanisawesome", new Paciente("1"));
-        users.put("gracehop", new Paciente("2"));
-
-        usersRef.setValueAsync(users);*/
-
-
-        //Firestore db = FirestoreClient.getFirestore();
-        
-        
-        //ApiFuture<QuerySnapshot> query = db.collection("usuarios").get();
-
-        
-        /*QuerySnapshot querySnapshot = null;
+    public PdfEmail subirArchivos(ConfiguracionFirebase configuracionFirebase,PdfEmail pdfEmail) {
+        PdfEmailServicio pdfEmailServicio = new PdfEmailServicio();
+                
         try {
-            querySnapshot = query.get();
-        } catch (InterruptedException ex) {
-            Logger.getLogger(FirebaseServicios.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ExecutionException ex) {
-            Logger.getLogger(FirebaseServicios.class.getName()).log(Level.SEVERE, null, ex);
+            refreshToken = new FileInputStream(configuracionFirebase.getRutaArchivo());
+        } catch (FileNotFoundException ex) {
+            pdfEmail.setInformeEstado("Error");
+            pdfEmail.setError("Error al buscar la ruta del archivo de firebase: "+ex.getMessage());
+            pdfEmailServicio.cambiarEstatusInforme(pdfEmail);
         }
-        List<QueryDocumentSnapshot> documents = querySnapshot.getDocuments();
-        for (QueryDocumentSnapshot document : documents) {
-          System.out.println("User: " + document.getId());
-          System.out.println("Nombre: " + document.getString("nombre"));
 
-        }*/
+        try {
+            options = FirebaseOptions.builder()
+                    .setCredentials(GoogleCredentials.fromStream(refreshToken))
+                    .setDatabaseUrl(configuracionFirebase.getDatabaseUrl())
+                    .setStorageBucket(configuracionFirebase.getStorageBucket())
+                    .build();
+        } catch (IOException ex) {
+            pdfEmail.setInformeEstado("Error");
+            pdfEmail.setError("Error al configurar firebase: "+ex.getMessage());
+            pdfEmailServicio.cambiarEstatusInforme(pdfEmail);
+        }
+
+        defaultApp = FirebaseApp.initializeApp(options);
+
+        bucket = StorageClient.getInstance().bucket();
+        
+        try {
+            testFile = new FileInputStream(pdfEmail.getRutaArchivo());
+        } catch (FileNotFoundException ex) {
+            pdfEmail.setInformeEstado("Error");
+            pdfEmail.setError("Error al subir archivos a firebase: "+ex.getMessage());
+            pdfEmailServicio.cambiarEstatusInforme(pdfEmail);
+        }
+        
+
+        blob = bucket.create(pdfEmail.getNombreArchivo(), testFile, Bucket.BlobWriteOption.userProject(configuracionFirebase.getProjectId()));
+
+        String link = blob.getMediaLink();
+
+        pdfEmail.setUrlArchivo(link);
+        pdfEmailServicio.cambiarEstatusInforme(pdfEmail);
+        
+        System.out.println("Pdf subido a firebase");
+
+        return pdfEmail;
     }
 }

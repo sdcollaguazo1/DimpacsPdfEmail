@@ -110,4 +110,29 @@ public class PdfEmailServicio {
         }
         return configuracion;
     }
+    
+        public Configuracion[] getConfiguracionFirebase() {
+        Configuracion[] configuracion = null;
+        Gson g = new Gson();
+        try {
+
+            URL url = new URL(apiDimpacs+"/configuracion/firebase");
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("Accept", "application/json");
+
+            if (conn.getResponseCode() == 200) {
+                BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+
+                String output;
+
+                while ((output = br.readLine()) != null) {
+                    configuracion = g.fromJson(output, Configuracion[].class);
+                }
+            }
+        } catch (IOException e) {
+            System.out.println(e);
+        }
+        return configuracion;
+    }
 }

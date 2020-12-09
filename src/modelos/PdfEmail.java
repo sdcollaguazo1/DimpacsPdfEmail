@@ -22,9 +22,15 @@ public class PdfEmail {
     private String pacienteCorreo;
     
     private String informeEstado;
+    
+    private String error;
+    
+    private String urlArchivo;
 
     private boolean enviarCorreo;
-
+    
+    private boolean subirFirebase;
+    
     public PdfEmail() {
         
     }   
@@ -85,7 +91,30 @@ public class PdfEmail {
     public void setEnviarCorreo(boolean enviarCorreo) {
         this.enviarCorreo = enviarCorreo;
     }
-    
-    
+
+    public boolean isSubirFirebase() {
+        return subirFirebase;
+    }
+
+    public void setSubirFirebase(boolean subirFirebase) {
+        this.subirFirebase = subirFirebase;
+    }
+
+    public String getError() {
+        return error;
+    }
+
+    public void setError(String error) {
+        this.error = error;
+    }
+
+    public String getUrlArchivo() {
+        return urlArchivo;
+    }
+
+    public void setUrlArchivo(String urlArchivo) {
+        this.urlArchivo = urlArchivo;
+    }
+       
     
 }
