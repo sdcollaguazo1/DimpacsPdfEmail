@@ -14,6 +14,7 @@ import modelos.Email;
 import modelos.PdfEmail;
 import servicios.FirebaseServicios;
 import servicios.PdfEmailServicio;
+import servicios.RecuperarEstudiosServicios;
 
 /**
  *
@@ -28,8 +29,17 @@ public class DimpacsPdfEmail {
     
     public static void main(String[] args){
         
-        PdfCopy pdfCopy = new PdfCopy();    
-        PdfEmailServicio pdfEmailServicio = new PdfEmailServicio();
+        if(args.length == 0){
+         System.exit(0);
+        }        
+        //String urlBackend = "http://localhost:8080/";
+        String urlBackend = args[0];
+        
+        PdfCopy pdfCopy = new PdfCopy(urlBackend);    
+        PdfEmailServicio pdfEmailServicio = new PdfEmailServicio(urlBackend);
+        RecuperarEstudiosServicios recuperarEstudiosServicios = new RecuperarEstudiosServicios();
+        
+        recuperarEstudiosServicios.getRecuperarEstudios();
         
         PdfEmail[] listPdfEmail = pdfEmailServicio.getListPdfEmail();
         
@@ -38,11 +48,11 @@ public class DimpacsPdfEmail {
             
             if (resultado == "OK") {    
                 if(pdfEmail.isSubirFirebase()){
-                    pdfEmail = subirArchivos(pdfEmail);
+                    pdfEmail = subirArchivos(pdfEmail,urlBackend);
                 }
                 
                 if (pdfEmail.isEnviarCorreo()) {
-                    enviarEmail(pdfEmail);                                     
+                    enviarEmail(pdfEmail,urlBackend);                                     
                 }
 
             }
@@ -50,10 +60,11 @@ public class DimpacsPdfEmail {
             
     }
     
-    private static void enviarEmail(PdfEmail pdfEmail){
+    private static void enviarEmail(PdfEmail pdfEmail,String urlBackend){
+        
         Email email = new Email();  
-        EmailSenderService emailSender = new EmailSenderService();
-        PdfEmailServicio pdfEmailServicio = new PdfEmailServicio();
+        EmailSenderService emailSender = new EmailSenderService(urlBackend);
+        PdfEmailServicio pdfEmailServicio = new PdfEmailServicio(urlBackend);
         
         Configuracion[] listConfiguracionEmail = pdfEmailServicio.getConfiguracionEmail();
         
@@ -61,9 +72,10 @@ public class DimpacsPdfEmail {
         emailSender.sendEmail(email,pdfEmail);
     }
     
-    private static PdfEmail  subirArchivos(PdfEmail pdfEmail){
-        PdfEmailServicio pdfEmailServicio = new PdfEmailServicio();
-        FirebaseServicios firebaseServicios = new FirebaseServicios();
+    private static PdfEmail  subirArchivos(PdfEmail pdfEmail,String urlBackend){
+        
+        PdfEmailServicio pdfEmailServicio = new PdfEmailServicio(urlBackend);
+        FirebaseServicios firebaseServicios = new FirebaseServicios(urlBackend);
         
         ConfiguracionFirebase configuracionFirebase = new ConfiguracionFirebase();  
          

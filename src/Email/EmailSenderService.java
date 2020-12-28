@@ -30,10 +30,17 @@ import servicios.PdfEmailServicio;
  */
 public class EmailSenderService {
 
-    private Session session;
+    private Session session;    
+    private String urlBackend;
+    
 
+    public EmailSenderService(String urlBackend) {
+        this.urlBackend = urlBackend;
+    }   
+    
+    
     public void sendEmail(Email email, PdfEmail pdfEmail) {
-        PdfEmailServicio pdfEmailServicio = new PdfEmailServicio();
+        PdfEmailServicio pdfEmailServicio = new PdfEmailServicio(this.urlBackend);
 
         try {
 
@@ -95,7 +102,7 @@ public class EmailSenderService {
             Session session = Session.getInstance(prop, null);
             //Agregamos un transport para el envio con la sesion
             Transport transport = session.getTransport("smtp");
-            transport.connect(email.getHost(), email.getPuerto(), email.getUsuario(), email.getClave());
+            transport.connect(email.getHost(), email.getPuerto(), email.getUsuario(), email.getClave());            
             transport.sendMessage(message, message.getAllRecipients());
             transport.close();
         } catch (NoSuchProviderException ex) {

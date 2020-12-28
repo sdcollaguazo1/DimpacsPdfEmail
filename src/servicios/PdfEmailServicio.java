@@ -24,7 +24,14 @@ import modelos.PdfEmail;
  */
 public class PdfEmailServicio {
 
-    String apiDimpacs = "http://localhost:8080/api/pdfEmail";
+    String apiDimpacs = "";
+    
+
+    public PdfEmailServicio(String urlBackend) {
+        this.apiDimpacs = urlBackend+"api/pdfEmail";
+    }
+    
+    
 
     public PdfEmail[] getListPdfEmail() {
         PdfEmail[] listPdfEmail = null;

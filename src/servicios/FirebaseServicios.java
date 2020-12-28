@@ -37,9 +37,18 @@ public class FirebaseServicios {
     private InputStream testFile;
 
     private Blob blob;
+    
+    private String urlBackend;
 
+    public FirebaseServicios(String urlBackend) {
+        this.urlBackend = urlBackend;
+    }
+    
+    
+    
     public PdfEmail subirArchivos(ConfiguracionFirebase configuracionFirebase,PdfEmail pdfEmail) {
-        PdfEmailServicio pdfEmailServicio = new PdfEmailServicio();
+        
+        PdfEmailServicio pdfEmailServicio = new PdfEmailServicio(this.urlBackend);
                 
         try {
             refreshToken = new FileInputStream(configuracionFirebase.getRutaArchivo());

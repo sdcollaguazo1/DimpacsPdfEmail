@@ -22,8 +22,14 @@ import servicios.PdfEmailServicio;
  */
 public class PdfCopy {
     
+    private String urlBackend;
+
+    public PdfCopy(String urlBackend) {
+        this.urlBackend = urlBackend;
+    }
+           
     public String guardarInforme(PdfEmail pdfEmail){
-       PdfEmailServicio pdfEmailServicio = new PdfEmailServicio();
+       PdfEmailServicio pdfEmailServicio = new PdfEmailServicio(this.urlBackend);
        URL url = null; 
         try {
             url = new URL(pdfEmail.getEnlace());
