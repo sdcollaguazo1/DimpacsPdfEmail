@@ -18,6 +18,9 @@ public class Email {
     private String subject;
     private String mensaje;
     private String pathLogo;
+    private String seguridad;
+    private String usarCorreoCopiaOculta;
+    private String correoCopiaOculta;
     
     public Email() {
 
@@ -78,6 +81,30 @@ public class Email {
     public void setPathLogo(String pathLogo) {
         this.pathLogo = pathLogo;
     }
+
+    public String getSeguridad() {
+        return seguridad;
+    }
+
+    public void setSeguridad(String seguridad) {
+        this.seguridad = seguridad;
+    }
+
+    public String getUsarCorreoCopiaOculta() {
+        return usarCorreoCopiaOculta;
+    }
+
+    public void setUsarCorreoCopiaOculta(String usarCorreoCopiaOculta) {
+        this.usarCorreoCopiaOculta = usarCorreoCopiaOculta;
+    }
+
+    public String getCorreoCopiaOculta() {
+        return correoCopiaOculta;
+    }
+
+    public void setCorreoCopiaOculta(String correoCopiaOculta) {
+        this.correoCopiaOculta = correoCopiaOculta;
+    }
     
     
 
@@ -105,6 +132,15 @@ public class Email {
                     break;
                 case 16:
                     email.setMensaje(configuracion.getValor());
+                    break;
+                case 36:
+                    email.setSeguridad(configuracion.getValor());
+                    break;
+                case 37:
+                    email.setUsarCorreoCopiaOculta(configuracion.getValor());
+                    break;
+                case 38:
+                    email.setCorreoCopiaOculta(configuracion.getValor());
                     break;
             }
 

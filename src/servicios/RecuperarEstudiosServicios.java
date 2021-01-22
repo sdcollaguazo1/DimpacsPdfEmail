@@ -18,8 +18,13 @@ import modelos.PdfEmail;
  * @author DESARROLLO-3
  */
 public class RecuperarEstudiosServicios {
+
+    String apiDimpacs = "";
     
-    String apiDimpacs = "http://localhost:8080/api/recuperarEstudios";
+
+    public RecuperarEstudiosServicios(String urlBackend) {
+        this.apiDimpacs = urlBackend+"api/recuperarEstudios";
+    }
     
     public void getRecuperarEstudios() {
        

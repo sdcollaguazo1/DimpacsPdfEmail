@@ -37,7 +37,7 @@ public class DimpacsPdfEmail {
         
         PdfCopy pdfCopy = new PdfCopy(urlBackend);    
         PdfEmailServicio pdfEmailServicio = new PdfEmailServicio(urlBackend);
-        RecuperarEstudiosServicios recuperarEstudiosServicios = new RecuperarEstudiosServicios();
+        RecuperarEstudiosServicios recuperarEstudiosServicios = new RecuperarEstudiosServicios(urlBackend);
         
         recuperarEstudiosServicios.getRecuperarEstudios();
         

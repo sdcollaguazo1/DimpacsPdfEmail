@@ -6,9 +6,12 @@
 package Email;
 
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.activation.FileDataSource;
+import javax.mail.Address;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.BodyPart;
 import javax.mail.Message;
@@ -16,6 +19,7 @@ import javax.mail.MessagingException;
 import javax.mail.NoSuchProviderException;
 import javax.mail.Session;
 import javax.mail.Transport;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
@@ -30,18 +34,18 @@ import servicios.PdfEmailServicio;
  */
 public class EmailSenderService {
 
-    private Session session;    
+    private Session session;
     private String urlBackend;
-    
 
     public EmailSenderService(String urlBackend) {
         this.urlBackend = urlBackend;
-    }   
-    
-    
+    }
+
     public void sendEmail(Email email, PdfEmail pdfEmail) {
         PdfEmailServicio pdfEmailServicio = new PdfEmailServicio(this.urlBackend);
-
+        Address [] destinatarios = stringToAddress(pdfEmail.getPacienteCorreo(),pdfEmail,pdfEmailServicio);
+        Address [] destinatariosCorreoCopia = stringToAddress(email.getCorreoCopiaOculta(),pdfEmail,pdfEmailServicio);
+        
         try {
 
             //Propiedades para el envio de correo
@@ -49,15 +53,25 @@ public class EmailSenderService {
             prop.put("mail.smtp.starttls.enable", "true");
             prop.put("mail.smtp.auth", "true");
             prop.put("mail.smtp.connectiontimeout", 1000);
-            //Habilitar en caso de seguridad SSL/TLS 
-            //prop.put("mail.smtp.socketFactory.port", "465");
-            prop.put("mail.smtp.socketFactory.class",
-                    "javax.net.ssl.SSLSocketFactory");
+           
+            if (email.getSeguridad().equals("Si")) {
+                //Habilitar en caso de seguridad SSL/TLS 
+                prop.put("mail.smtp.socketFactory.class",
+                        "javax.net.ssl.SSLSocketFactory");
+            } else {
+                prop.put("mail.smtp.ssl.trust", email.getHost());
+            }
 
             //Inicializamos el mensaje con datos del email
             MimeMessage message = new MimeMessage(session);
             message.setFrom(new InternetAddress(email.getUsuario()));
-            message.addRecipient(Message.RecipientType.TO, new InternetAddress(pdfEmail.getPacienteCorreo()));
+            message.addRecipients(Message.RecipientType.TO, destinatarios);
+            
+            
+            if(email.getUsarCorreoCopiaOculta().equals("Si")){
+                message.addRecipients(Message.RecipientType.BCC,destinatariosCorreoCopia);
+            }
+ 
             message.setSubject(email.getSubject());
 
             //Declaramos el multipart, para agregar varias partes al correo
@@ -68,11 +82,11 @@ public class EmailSenderService {
             String htmlText = "<H1>" + email.getSubject() + "</H1>"
                     + "<img src=\"cid:image\">"
                     + "<p>" + email.getMensaje() + "</p>";
-            
+
             //Agregar enlace de firebase en caso de subir
-            if(pdfEmail.isSubirFirebase()){
+            if (pdfEmail.isSubirFirebase()) {
                 htmlText = htmlText
-                        +"<a href=\""+pdfEmail.getUrlArchivo()+"\" target=\"_blank\">Descargar informe</a>";                        
+                        + "<a href=\"" + pdfEmail.getUrlArchivo() + "\" target=\"_blank\">Descargar informe</a>";
             }
             messageBodyPart.setContent(htmlText, "text/html");
             // Añadimos el hml al multipart
@@ -86,7 +100,7 @@ public class EmailSenderService {
             // añadimos la imagen al multipart
             multipart.addBodyPart(imagenBodyPart);
 
-           if (!pdfEmail.isSubirFirebase()) {            
+            if (!pdfEmail.isSubirFirebase()) {
                 //Tercera parte adjuntamos el pdf
                 BodyPart pdfBodyPart = new MimeBodyPart();
                 DataSource source = new FileDataSource(pdfEmail.getRutaArchivo());
@@ -102,7 +116,7 @@ public class EmailSenderService {
             Session session = Session.getInstance(prop, null);
             //Agregamos un transport para el envio con la sesion
             Transport transport = session.getTransport("smtp");
-            transport.connect(email.getHost(), email.getPuerto(), email.getUsuario(), email.getClave());            
+            transport.connect(email.getHost(), email.getPuerto(), email.getUsuario(), email.getClave());
             transport.sendMessage(message, message.getAllRecipients());
             transport.close();
         } catch (NoSuchProviderException ex) {
@@ -133,4 +147,21 @@ public class EmailSenderService {
 
     }
 
+    
+    public Address [] stringToAddress(String destinatarioString,PdfEmail pdfEmail,PdfEmailServicio pdfEmailServicio){
+        String[] destinatarios = destinatarioString.split(",");
+        
+        Address[] destinos = new Address[destinatarios.length];
+        for(int i=0;i<destinos.length;i++){
+            try {
+                destinos[i]=new InternetAddress(destinatarios[i]);
+            } catch (AddressException ex) {
+                pdfEmail.setInformeEstado("Error");
+                pdfEmail.setError("Error al enviar el correo: " + ex.getMessage());
+                pdfEmailServicio.cambiarEstatusInforme(pdfEmail);
+                System.out.println("AddressException: " + ex.getMessage());
+            }
+        }
+        return destinos;
+    }
 }
