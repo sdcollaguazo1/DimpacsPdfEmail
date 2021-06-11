@@ -151,6 +151,7 @@ public class PdfEmail {
     public boolean isGuardarInforme() {
         return guardarInforme;
     }
+
     public void setGuardarInforme(boolean guardarInforme) {
         this.guardarInforme = guardarInforme;
     }
