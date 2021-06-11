@@ -20,7 +20,7 @@ public class Configuracion {
     private String observacion;
 
     private String valor;
-
+    
     public Configuracion() {
     }
 
@@ -64,5 +64,4 @@ public class Configuracion {
         this.valor = valor;
     }
 
-    
 }

@@ -26,10 +26,18 @@ public class PdfEmail {
     private String error;
     
     private String urlArchivo;
+    
+    private String pacienteNombreApellido;
 
     private boolean enviarCorreo;
     
     private boolean subirFirebase;
+    
+    private String pathConvenio;
+    
+    private boolean usarConvenio;
+    
+    private boolean guardarInforme;
     
     public PdfEmail() {
         
@@ -115,6 +123,36 @@ public class PdfEmail {
     public void setUrlArchivo(String urlArchivo) {
         this.urlArchivo = urlArchivo;
     }
-       
+
+    public String getPathConvenio() {
+        return pathConvenio;
+    }
+
+    public void setPathConvenio(String pathConvenio) {
+        this.pathConvenio = pathConvenio;
+    }
+
+    public boolean isUsarConvenio() {
+        return usarConvenio;
+    }
+
+    public void setUsarConvenio(boolean usarConvenio) {
+        this.usarConvenio = usarConvenio;
+    }
+
+    public String getPacienteNombreApellido() {
+        return pacienteNombreApellido;
+    }
+
+    public void setPacienteNombreApellido(String pacienteNombreApellido) {
+        this.pacienteNombreApellido = pacienteNombreApellido;
+    }
+
+    public boolean isGuardarInforme() {
+        return guardarInforme;
+    }
+    public void setGuardarInforme(boolean guardarInforme) {
+        this.guardarInforme = guardarInforme;
+    }
     
 }

@@ -21,6 +21,8 @@ public class Email {
     private String seguridad;
     private String usarCorreoCopiaOculta;
     private String correoCopiaOculta;
+    private String path;
+    private boolean pacienteAsunto;
     
     public Email() {
 
@@ -105,9 +107,24 @@ public class Email {
     public void setCorreoCopiaOculta(String correoCopiaOculta) {
         this.correoCopiaOculta = correoCopiaOculta;
     }
-    
-    
 
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public boolean isPacienteAsunto() {
+        return pacienteAsunto;
+    }
+
+    public void setPacienteAsunto(boolean pacienteAsunto) {
+        this.pacienteAsunto = pacienteAsunto;
+    }
+    
+   
     public Email convertirConfiguracionToEmail(Configuracion[] listConfiguracion) {
         Email email = new Email();
         for (Configuracion configuracion : listConfiguracion) {
@@ -115,6 +132,9 @@ public class Email {
                 case 5:
                     email.setPathLogo(configuracion.getValor());
                     break;
+                case 10:
+                    email.setPath(configuracion.getValor());
+                    break;                    
                 case 11:
                     email.setHost(configuracion.getValor());
                     break;
@@ -141,6 +161,13 @@ public class Email {
                     break;
                 case 38:
                     email.setCorreoCopiaOculta(configuracion.getValor());
+                    break;
+                case 47:
+                    if(configuracion.getValor().equals("Si")){
+                        email.setPacienteAsunto(true);
+                    }else{
+                        email.setPacienteAsunto(false);
+                    }
                     break;
             }
 

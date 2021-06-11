@@ -6,13 +6,16 @@
 package dimpacspdfemail;
 
 import Email.EmailSenderService;
+import Email.LogCorreoSenderService;
 import Pdf.PdfCopy;
 import java.io.IOException;
 import modelos.Configuracion;
 import modelos.ConfiguracionFirebase;
 import modelos.Email;
+import modelos.LogCorreo;
 import modelos.PdfEmail;
 import servicios.FirebaseServicios;
+import servicios.LogCorreoServicio;
 import servicios.PdfEmailServicio;
 import servicios.RecuperarEstudiosServicios;
 
@@ -38,13 +41,19 @@ public class DimpacsPdfEmail {
         PdfCopy pdfCopy = new PdfCopy(urlBackend);    
         PdfEmailServicio pdfEmailServicio = new PdfEmailServicio(urlBackend);
         RecuperarEstudiosServicios recuperarEstudiosServicios = new RecuperarEstudiosServicios(urlBackend);
+        LogCorreoServicio logCorreoServicio = new LogCorreoServicio(urlBackend);
         
         recuperarEstudiosServicios.getRecuperarEstudios();
         
         PdfEmail[] listPdfEmail = pdfEmailServicio.getListPdfEmail();
+        LogCorreo[] listLogCorreo = logCorreoServicio.getLogCorreoEnviar();
         
         for (PdfEmail pdfEmail : listPdfEmail) {
-            String resultado = pdfCopy.guardarInforme(pdfEmail);
+            String resultado = "OK";
+            
+            if(pdfEmail.isGuardarInforme()){
+                resultado = pdfCopy.guardarInforme(pdfEmail);
+            }
             
             if (resultado == "OK") {    
                 if(pdfEmail.isSubirFirebase()){
@@ -57,6 +66,10 @@ public class DimpacsPdfEmail {
 
             }
         } 
+        
+        for(LogCorreo logCorreo : listLogCorreo){
+            enviarMailLog(logCorreo,urlBackend);
+        }
             
     }
     
@@ -72,6 +85,19 @@ public class DimpacsPdfEmail {
         emailSender.sendEmail(email,pdfEmail);
     }
     
+     private static void enviarMailLog(LogCorreo logCorreo,String urlBackend){
+        
+        Email email = new Email();  
+        LogCorreoSenderService emailSender = new LogCorreoSenderService(urlBackend);
+        PdfEmailServicio pdfEmailServicio = new PdfEmailServicio(urlBackend);
+        
+        Configuracion[] listConfiguracionEmail = pdfEmailServicio.getConfiguracionEmail();
+        
+        email = email.convertirConfiguracionToEmail(listConfiguracionEmail);
+        emailSender.sendEmail(email,logCorreo);
+    }
+    
+     
     private static PdfEmail  subirArchivos(PdfEmail pdfEmail,String urlBackend){
         
         PdfEmailServicio pdfEmailServicio = new PdfEmailServicio(urlBackend);

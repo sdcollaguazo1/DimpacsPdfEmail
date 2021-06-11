@@ -17,7 +17,6 @@ import java.net.URL;
 import modelos.Configuracion;
 import modelos.PdfEmail;
 
-
 /**
  *
  * @author DESARROLLO-3
@@ -25,13 +24,10 @@ import modelos.PdfEmail;
 public class PdfEmailServicio {
 
     String apiDimpacs = "";
-    
 
     public PdfEmailServicio(String urlBackend) {
-        this.apiDimpacs = urlBackend+"api/pdfEmail";
+        this.apiDimpacs = urlBackend + "api/pdfEmail";
     }
-    
-    
 
     public PdfEmail[] getListPdfEmail() {
         PdfEmail[] listPdfEmail = null;
@@ -60,23 +56,23 @@ public class PdfEmailServicio {
 
     public String cambiarEstatusInforme(PdfEmail pdfEmail) {
         String resultado = "";
-        Gson g = new Gson();      
+        Gson g = new Gson();
         String json = g.toJson(pdfEmail);
-      
+
         try {
             URL url = new URL(apiDimpacs);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json; utf-8");
-            conn.setDoOutput(true); 
+            conn.setDoOutput(true);
             conn.setDoInput(true);
-            
-            try(OutputStream os = conn.getOutputStream()) {
+
+            try (OutputStream os = conn.getOutputStream()) {
                 byte[] input = json.getBytes("utf-8");
-                os.write(input, 0, input.length);			
+                os.write(input, 0, input.length);
             }
-            
-            try(BufferedReader br = new BufferedReader(
+
+            try (BufferedReader br = new BufferedReader(
                     new InputStreamReader(conn.getInputStream(), "utf-8"))) {
                 StringBuilder response = new StringBuilder();
                 String responseLine = null;
@@ -85,20 +81,20 @@ public class PdfEmailServicio {
                 }
                 resultado = response.toString();
             }
-            
+
         } catch (IOException e) {
             return e.toString();
         }
 
         return resultado;
     }
-    
+
     public Configuracion[] getConfiguracionEmail() {
         Configuracion[] configuracion = null;
         Gson g = new Gson();
         try {
 
-            URL url = new URL(apiDimpacs+"/configuracion");
+            URL url = new URL(apiDimpacs + "/configuracion");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.setRequestProperty("Accept", "application/json");
@@ -117,13 +113,13 @@ public class PdfEmailServicio {
         }
         return configuracion;
     }
-    
-        public Configuracion[] getConfiguracionFirebase() {
+
+    public Configuracion[] getConfiguracionFirebase() {
         Configuracion[] configuracion = null;
         Gson g = new Gson();
         try {
 
-            URL url = new URL(apiDimpacs+"/configuracion/firebase");
+            URL url = new URL(apiDimpacs + "/configuracion/firebase");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.setRequestProperty("Accept", "application/json");

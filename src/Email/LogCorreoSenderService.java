@@ -6,8 +6,6 @@
 package Email;
 
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.activation.FileDataSource;
@@ -25,27 +23,28 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import modelos.Email;
-import modelos.PdfEmail;
-import servicios.PdfEmailServicio;
+import modelos.LogCorreo;
+import servicios.LogCorreoServicio;
 
 /**
  *
- * @author DESARROLLO-3
+ * @author digetbi
  */
-public class EmailSenderService {
+public class LogCorreoSenderService {
 
     private Session session;
     private String urlBackend;
 
-    public EmailSenderService(String urlBackend) {
+    public LogCorreoSenderService(String urlBackend) {
         this.urlBackend = urlBackend;
     }
 
-    public void sendEmail(Email email, PdfEmail pdfEmail) {
-        PdfEmailServicio pdfEmailServicio = new PdfEmailServicio(this.urlBackend);
-        Address [] destinatarios = stringToAddress(pdfEmail.getPacienteCorreo(),pdfEmail,pdfEmailServicio);
-        Address [] destinatariosCorreoCopia = stringToAddress(email.getCorreoCopiaOculta(),pdfEmail,pdfEmailServicio);
+    public void sendEmail(Email email, LogCorreo logCorreo) {
+        LogCorreoServicio logCorreoServicio = new LogCorreoServicio(this.urlBackend);
+        Address[] destinatarios = stringToAddress(logCorreo.getDestinatarios(), logCorreo, logCorreoServicio);
+        Address[] destinatariosCorreoCopia = stringToAddress(email.getCorreoCopiaOculta(), logCorreo, logCorreoServicio);
         String asunto = email.getSubject();
+
         try {
 
             //Propiedades para el envio de correo
@@ -53,13 +52,13 @@ public class EmailSenderService {
             prop.put("mail.smtp.starttls.enable", "true");
             prop.put("mail.smtp.auth", "true");
             prop.put("mail.smtp.connectiontimeout", 1000);
-           
+
             if (email.getSeguridad().equals("Si")) {
                 //Habilitar en caso de seguridad SSL/TLS 
                 prop.put("mail.smtp.socketFactory.class",
                         "javax.net.ssl.SSLSocketFactory");
                 prop.put("mail.smtp.socketFactory.port", email.getPuerto());
-                prop.put("mail.smtp.socketFactory.fallback","false");
+                prop.put("mail.smtp.socketFactory.fallback", "false");
             } else {
                 prop.put("mail.smtp.ssl.trust", email.getHost());
             }
@@ -68,16 +67,14 @@ public class EmailSenderService {
             MimeMessage message = new MimeMessage(session);
             message.setFrom(new InternetAddress(email.getUsuario()));
             message.addRecipients(Message.RecipientType.TO, destinatarios);
-            
-            
-            if(email.getUsarCorreoCopiaOculta().equals("Si")){
-                message.addRecipients(Message.RecipientType.BCC,destinatariosCorreoCopia);
+
+            if (email.getUsarCorreoCopiaOculta().equals("Si")) {
+                message.addRecipients(Message.RecipientType.BCC, destinatariosCorreoCopia);
             }
             
-            if(email.isPacienteAsunto()){
-                asunto = asunto+" "+pdfEmail.getPacienteNombreApellido();
+            if (email.isPacienteAsunto()) {
+                asunto = asunto + " " + logCorreo.getPacienteNombreApellido();
             }
- 
             message.setSubject(asunto);
 
             //Declaramos el multipart, para agregar varias partes al correo
@@ -89,11 +86,6 @@ public class EmailSenderService {
                     + "<img src=\"cid:image\">"
                     + "<p>" + email.getMensaje() + "</p>";
 
-            //Agregar enlace de firebase en caso de subir
-            if (pdfEmail.isSubirFirebase()) {
-                htmlText = htmlText
-                        + "<a href=\"" + pdfEmail.getUrlArchivo() + "\" target=\"_blank\">Descargar informe</a>";
-            }
             messageBodyPart.setContent(htmlText, "text/html");
             // Añadimos el hml al multipart
             multipart.addBodyPart(messageBodyPart);
@@ -101,26 +93,26 @@ public class EmailSenderService {
             // Segunda parte agregamos la imagen 
             BodyPart imagenBodyPart = new MimeBodyPart();
             DataSource fds = null;
-            if(pdfEmail.isUsarConvenio()){
-                fds = new FileDataSource(pdfEmail.getPathConvenio());
-            }else{
+
+            if (logCorreo.isUsarConvenio()) {
+                fds = new FileDataSource(email.getPath() + "/img/" + logCorreo.getImgConvenio());
+            } else {
                 fds = new FileDataSource(email.getPathLogo());
             }
-            
+
             imagenBodyPart.setDataHandler(new DataHandler(fds));
             imagenBodyPart.setHeader("Content-ID", "<image>");
             // añadimos la imagen al multipart
             multipart.addBodyPart(imagenBodyPart);
 
-            if (!pdfEmail.isSubirFirebase()) {
-                //Tercera parte adjuntamos el pdf
-                BodyPart pdfBodyPart = new MimeBodyPart();
-                DataSource source = new FileDataSource(pdfEmail.getRutaArchivo());
-                pdfBodyPart.setDataHandler(new DataHandler(source));
-                pdfBodyPart.setFileName(pdfEmail.getNombreArchivo());
-                //añadimos el pdf al multipart
-                multipart.addBodyPart(pdfBodyPart);
-            }
+            //Tercera parte adjuntamos el pdf
+            BodyPart pdfBodyPart = new MimeBodyPart();
+            DataSource source = new FileDataSource(email.getPath() + "/informes/" + logCorreo.getNombreArchivo());
+            pdfBodyPart.setDataHandler(new DataHandler(source));
+            pdfBodyPart.setFileName(logCorreo.getNombreArchivo());
+            //añadimos el pdf al multipart
+            multipart.addBodyPart(pdfBodyPart);
+
             // Agregamos el multipart al contenido del mensaje
             message.setContent(multipart);
 
@@ -132,48 +124,48 @@ public class EmailSenderService {
             transport.sendMessage(message, message.getAllRecipients());
             transport.close();
         } catch (NoSuchProviderException ex) {
-            pdfEmail.setInformeEstado("Error");
-            pdfEmail.setError("Error al enviar el correo: " + ex.getMessage());
-            pdfEmailServicio.cambiarEstatusInforme(pdfEmail);
+            logCorreo.setEstado("Error");
+            logCorreo.setObservacion("Error al enviar el correo: " + ex.getMessage());
+            logCorreoServicio.cambiarEstadoLogCorreo(logCorreo);
             System.out.println("NoSuchProviderException: " + ex.getMessage());
             return;
 
         } catch (AuthenticationFailedException ex) {
-            pdfEmail.setInformeEstado("Error");
-            pdfEmail.setError("Error al enviar el correo: " + ex.getMessage());
-            pdfEmailServicio.cambiarEstatusInforme(pdfEmail);
+            logCorreo.setEstado("Error");
+            logCorreo.setObservacion("Error al enviar el correo: " + ex.getMessage());
+            logCorreoServicio.cambiarEstadoLogCorreo(logCorreo);
             System.out.println("AuthenticationFailedException: " + ex.getMessage());
             return;
 
         } catch (MessagingException ex) {
-            pdfEmail.setInformeEstado("Error");
-            pdfEmail.setError("Error al enviar el correo: " + ex.getMessage());
-            pdfEmailServicio.cambiarEstatusInforme(pdfEmail);
+            logCorreo.setEstado("Error");
+            logCorreo.setObservacion("Error al enviar el correo: " + ex.getMessage());
+            logCorreoServicio.cambiarEstadoLogCorreo(logCorreo);
             System.out.println("MessagingException: " + ex.getMessage());
             return;
 
         }
-        pdfEmail.setInformeEstado("Email enviado");
-        pdfEmailServicio.cambiarEstatusInforme(pdfEmail);
+        logCorreo.setEstado("Email enviado");
+        logCorreoServicio.cambiarEstadoLogCorreo(logCorreo);
         System.out.println("Email Enviado");
 
     }
 
-    
-    public Address [] stringToAddress(String destinatarioString,PdfEmail pdfEmail,PdfEmailServicio pdfEmailServicio){
+    public Address[] stringToAddress(String destinatarioString, LogCorreo logCorreo, LogCorreoServicio logCorreoServicio) {
         String[] destinatarios = destinatarioString.split(",");
-        
+
         Address[] destinos = new Address[destinatarios.length];
-        for(int i=0;i<destinos.length;i++){
+        for (int i = 0; i < destinos.length; i++) {
             try {
-                destinos[i]=new InternetAddress(destinatarios[i]);
+                destinos[i] = new InternetAddress(destinatarios[i]);
             } catch (AddressException ex) {
-                pdfEmail.setInformeEstado("Error");
-                pdfEmail.setError("Error al enviar el correo: " + ex.getMessage());
-                pdfEmailServicio.cambiarEstatusInforme(pdfEmail);
+                logCorreo.setEstado("Error");
+                logCorreo.setObservacion("Error al enviar el correo: " + ex.getMessage());
+                logCorreoServicio.cambiarEstadoLogCorreo(logCorreo);
                 System.out.println("AddressException: " + ex.getMessage());
             }
         }
         return destinos;
     }
+
 }
