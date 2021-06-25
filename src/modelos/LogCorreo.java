@@ -12,6 +12,7 @@ package modelos;
 public class LogCorreo {
 
     private Long id;
+    private Long empresaId;
     private String destinatarios;
     private String estado;
     private String detalle;
@@ -94,6 +95,14 @@ public class LogCorreo {
 
     public void setPacienteNombreApellido(String pacienteNombreApellido) {
         this.pacienteNombreApellido = pacienteNombreApellido;
+    }
+
+    public Long getEmpresaId() {
+        return empresaId;
+    }
+
+    public void setEmpresaId(Long empresaId) {
+        this.empresaId = empresaId;
     }
 
 }

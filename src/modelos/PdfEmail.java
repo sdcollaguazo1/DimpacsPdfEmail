@@ -13,6 +13,8 @@ public class PdfEmail {
     
     private Long informeId;
     
+    private Long empresaId;
+    
     private String enlace;
     
     private String rutaArchivo;
@@ -154,6 +156,14 @@ public class PdfEmail {
 
     public void setGuardarInforme(boolean guardarInforme) {
         this.guardarInforme = guardarInforme;
+    }
+
+    public Long getEmpresaId() {
+        return empresaId;
+    }
+
+    public void setEmpresaId(Long empresaId) {
+        this.empresaId = empresaId;
     }
     
 }

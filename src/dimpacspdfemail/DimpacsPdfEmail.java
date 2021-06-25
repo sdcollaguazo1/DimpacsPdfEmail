@@ -79,7 +79,7 @@ public class DimpacsPdfEmail {
         EmailSenderService emailSender = new EmailSenderService(urlBackend);
         PdfEmailServicio pdfEmailServicio = new PdfEmailServicio(urlBackend);
         
-        Configuracion[] listConfiguracionEmail = pdfEmailServicio.getConfiguracionEmail();
+        Configuracion[] listConfiguracionEmail = pdfEmailServicio.getConfiguracionEmail(pdfEmail.getEmpresaId());
         
         email = email.convertirConfiguracionToEmail(listConfiguracionEmail);
         emailSender.sendEmail(email,pdfEmail);
@@ -91,7 +91,7 @@ public class DimpacsPdfEmail {
         LogCorreoSenderService emailSender = new LogCorreoSenderService(urlBackend);
         PdfEmailServicio pdfEmailServicio = new PdfEmailServicio(urlBackend);
         
-        Configuracion[] listConfiguracionEmail = pdfEmailServicio.getConfiguracionEmail();
+        Configuracion[] listConfiguracionEmail = pdfEmailServicio.getConfiguracionEmail(logCorreo.getEmpresaId());
         
         email = email.convertirConfiguracionToEmail(listConfiguracionEmail);
         emailSender.sendEmail(email,logCorreo);
@@ -105,7 +105,7 @@ public class DimpacsPdfEmail {
         
         ConfiguracionFirebase configuracionFirebase = new ConfiguracionFirebase();  
          
-        Configuracion[] listConfiguracionFirebase = pdfEmailServicio.getConfiguracionFirebase();
+        Configuracion[] listConfiguracionFirebase = pdfEmailServicio.getConfiguracionFirebase(pdfEmail.getEmpresaId());
         configuracionFirebase = configuracionFirebase.convertirConfiguracionFirebase(listConfiguracionFirebase);
         
         return firebaseServicios.subirArchivos(configuracionFirebase,pdfEmail);

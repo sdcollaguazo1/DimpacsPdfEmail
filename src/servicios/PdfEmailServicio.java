@@ -89,12 +89,14 @@ public class PdfEmailServicio {
         return resultado;
     }
 
-    public Configuracion[] getConfiguracionEmail() {
+    public Configuracion[] getConfiguracionEmail(Long empresaId) {
         Configuracion[] configuracion = null;
         Gson g = new Gson();
+        String id = String.valueOf(empresaId);
+        
         try {
 
-            URL url = new URL(apiDimpacs + "/configuracion");
+            URL url = new URL(apiDimpacs + "/configuracion?empresaId="+id);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.setRequestProperty("Accept", "application/json");
@@ -114,12 +116,14 @@ public class PdfEmailServicio {
         return configuracion;
     }
 
-    public Configuracion[] getConfiguracionFirebase() {
+    public Configuracion[] getConfiguracionFirebase(Long empresaId) {
         Configuracion[] configuracion = null;
         Gson g = new Gson();
+        String id = String.valueOf(empresaId);
+        
         try {
 
-            URL url = new URL(apiDimpacs + "/configuracion/firebase");
+            URL url = new URL(apiDimpacs + "/configuracion/firebase?empresaId="+id);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.setRequestProperty("Accept", "application/json");
