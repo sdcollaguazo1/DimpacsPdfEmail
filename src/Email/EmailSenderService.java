@@ -112,7 +112,7 @@ public class EmailSenderService {
             // añadimos la imagen al multipart
             multipart.addBodyPart(imagenBodyPart);
 
-            if (!pdfEmail.isSubirFirebase()) {
+            //if (!pdfEmail.isSubirFirebase()) {
                 //Tercera parte adjuntamos el pdf
                 BodyPart pdfBodyPart = new MimeBodyPart();
                 DataSource source = new FileDataSource(pdfEmail.getRutaArchivo());
@@ -120,7 +120,7 @@ public class EmailSenderService {
                 pdfBodyPart.setFileName(pdfEmail.getNombreArchivo());
                 //añadimos el pdf al multipart
                 multipart.addBodyPart(pdfBodyPart);
-            }
+            //}
             // Agregamos el multipart al contenido del mensaje
             message.setContent(multipart);
 
