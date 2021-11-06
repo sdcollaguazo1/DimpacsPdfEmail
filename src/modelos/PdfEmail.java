@@ -5,6 +5,9 @@
  */
 package modelos;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  *
  * @author DESARROLLO-3
@@ -41,8 +44,11 @@ public class PdfEmail {
     
     private boolean guardarInforme;
     
+    private List<String>urlImagenes;
+	
+    
     public PdfEmail() {
-        
+        this.urlImagenes = new ArrayList<String>();
     }   
     
 
@@ -165,5 +171,13 @@ public class PdfEmail {
     public void setEmpresaId(Long empresaId) {
         this.empresaId = empresaId;
     }
-    
+
+    public List<String> getUrlImagenes() {
+        return urlImagenes;
+    }
+
+    public void setUrlImagenes(List<String> urlImagenes) {
+        this.urlImagenes = urlImagenes;
+    }
+   
 }

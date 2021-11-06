@@ -6,6 +6,7 @@
 package servicios;
 
 import com.google.gson.Gson;
+import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,6 +15,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import javax.imageio.ImageIO;
 import modelos.Configuracion;
 import modelos.PdfEmail;
 
@@ -35,6 +37,7 @@ public class PdfEmailServicio {
         try {
 
             URL url = new URL(apiDimpacs);
+            BufferedImage image = ImageIO.read(url);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.setRequestProperty("Accept", "application/json");

@@ -5,12 +5,20 @@
  */
 package Email;
 
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.activation.FileDataSource;
+import javax.activation.URLDataSource;
+import javax.imageio.ImageIO;
 import javax.mail.Address;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.BodyPart;
@@ -24,6 +32,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import javax.mail.util.ByteArrayDataSource;
 import modelos.Email;
 import modelos.PdfEmail;
 import servicios.PdfEmailServicio;
@@ -120,6 +129,25 @@ public class EmailSenderService {
             //añadimos el pdf al multipart
             multipart.addBodyPart(pdfBodyPart);
             //}
+
+            if (pdfEmail.getUrlImagenes().size() > 0) {
+                for (String img : pdfEmail.getUrlImagenes()) {
+                    try {
+                        URL url = new URL(img);
+                        URLDataSource ds = new URLDataSource(url);
+                       //TODO: VALIDAR QUE SOLAMENTE SE ENVIEN IMAGENES, ERROR AL ENVIAR VIDEOS    
+                        BodyPart imagenEstudiosBodyPart = new MimeBodyPart();
+                        imagenEstudiosBodyPart.setDataHandler(new DataHandler(ds));
+                        imagenEstudiosBodyPart.setFileName("img.jpeg");
+                        imagenEstudiosBodyPart.setHeader("Content-ID", "<image>");
+                        // añadimos la imagen al multipart
+                        multipart.addBodyPart(imagenEstudiosBodyPart);
+
+                    } catch (IOException e) {
+                        System.out.println(e.getMessage());
+                    }
+                }
+            }
             // Agregamos el multipart al contenido del mensaje
             message.setContent(multipart);
 
@@ -148,7 +176,7 @@ public class EmailSenderService {
             pdfEmail.setInformeEstado("Error");
             pdfEmail.setError("Error al enviar el correo: " + ex.getMessage());
             pdfEmailServicio.cambiarEstatusInforme(pdfEmail);
-            System.out.println("MessagingException: " + ex.getMessage());
+            System.out.println("MessagingException: " + ex.getMessage() + " " + ex.getCause().getMessage());
             return;
 
         }
