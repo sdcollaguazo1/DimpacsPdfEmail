@@ -35,6 +35,7 @@ import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
 import modelos.Email;
 import modelos.PdfEmail;
+import servicios.LogCorreoServicio;
 import servicios.PdfEmailServicio;
 
 /**
@@ -52,6 +53,8 @@ public class EmailSenderService {
 
     public void sendEmail(Email email, PdfEmail pdfEmail) {
         PdfEmailServicio pdfEmailServicio = new PdfEmailServicio(this.urlBackend);
+        LogCorreoServicio logCorreoServicio = new LogCorreoServicio(this.urlBackend);
+        
         Address[] destinatarios = stringToAddress(pdfEmail.getPacienteCorreo(), pdfEmail, pdfEmailServicio);
         Address[] destinatariosCorreoCopia = stringToAddress(email.getCorreoCopiaOculta(), pdfEmail, pdfEmailServicio);
         String asunto = email.getSubject();
@@ -100,7 +103,7 @@ public class EmailSenderService {
             //Agregar enlace de firebase en caso de subir
             if (pdfEmail.isSubirFirebase()) {
                 htmlText = htmlText
-                        + "<a href=\"" + pdfEmail.getUrlArchivo() + "\" target=\"_blank\" rel=\"noopener noreferrer\">DESCARGAR INFORME</a>";
+                        + "<a href=\"" + pdfEmail.getUrlArchivo() + "\" target=\"_blank\" rel=\"noopener noreferrer\">VISUALIZAR INFORME</a>";
             }
             messageBodyPart.setContent(htmlText, "text/html");
             // Añadimos el hml al multipart
@@ -162,6 +165,7 @@ public class EmailSenderService {
             pdfEmail.setInformeEstado("Error");
             pdfEmail.setError("Error al enviar el correo: " + ex.getMessage());
             pdfEmailServicio.cambiarEstatusInforme(pdfEmail);
+            logCorreoServicio.guardarLogCorreo(pdfEmail.getLogCorreo());
             System.out.println("NoSuchProviderException: " + ex.getMessage());
             return;
 
@@ -169,6 +173,7 @@ public class EmailSenderService {
             pdfEmail.setInformeEstado("Error");
             pdfEmail.setError("Error al enviar el correo: " + ex.getMessage());
             pdfEmailServicio.cambiarEstatusInforme(pdfEmail);
+            logCorreoServicio.guardarLogCorreo(pdfEmail.getLogCorreo());
             System.out.println("AuthenticationFailedException: " + ex.getMessage());
             return;
 
@@ -176,12 +181,14 @@ public class EmailSenderService {
             pdfEmail.setInformeEstado("Error");
             pdfEmail.setError("Error al enviar el correo: " + ex.getMessage());
             pdfEmailServicio.cambiarEstatusInforme(pdfEmail);
+            logCorreoServicio.guardarLogCorreo(pdfEmail.getLogCorreo());
             System.out.println("MessagingException: " + ex.getMessage() + " " + ex.getCause().getMessage());
             return;
 
         }
         pdfEmail.setInformeEstado("Email enviado");
         pdfEmailServicio.cambiarEstatusInforme(pdfEmail);
+        logCorreoServicio.guardarLogCorreo(pdfEmail.getLogCorreo());
         System.out.println("Email Enviado");
 
     }

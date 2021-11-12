@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import modelos.PdfEmail;
+import servicios.LogCorreoServicio;
 import servicios.PdfEmailServicio;
 
 /**
@@ -30,12 +31,15 @@ public class PdfCopy {
            
     public String guardarInforme(PdfEmail pdfEmail){
        PdfEmailServicio pdfEmailServicio = new PdfEmailServicio(this.urlBackend);
+       LogCorreoServicio logCorreoServicio = new LogCorreoServicio(this.urlBackend);
        URL url = null; 
         try {
             url = new URL(pdfEmail.getEnlace());
         } catch (MalformedURLException ex) {
-            pdfEmail.setInformeEstado("Error al guardar el informe: "+ex.getMessage());
+            pdfEmail.setInformeEstado("Error");
+            pdfEmail.setError("Error al guardar el informe: "+ex.getMessage());
             pdfEmailServicio.cambiarEstatusInforme(pdfEmail);
+            logCorreoServicio.guardarLogCorreo(pdfEmail.getLogCorreo());
             return (ex.getMessage());
         }
        InputStream in; 
@@ -44,13 +48,16 @@ public class PdfCopy {
             Files.copy(in, Paths.get(pdfEmail.getRutaArchivo()), StandardCopyOption.REPLACE_EXISTING); 
             in.close(); 
         } catch (IOException ex) {
-            pdfEmail.setInformeEstado("Error al guardar el informe: "+ex.getMessage());
+            pdfEmail.setInformeEstado("Error");
+            pdfEmail.setError("Error al guardar el informe: "+ex.getMessage());
             pdfEmailServicio.cambiarEstatusInforme(pdfEmail);
+            logCorreoServicio.guardarLogCorreo(pdfEmail.getLogCorreo());
             return (ex.getMessage());
         }
         
         pdfEmail.setInformeEstado("Pdf generado");
         pdfEmailServicio.cambiarEstatusInforme(pdfEmail);
+        logCorreoServicio.guardarLogCorreo(pdfEmail.getLogCorreo());
         System.out.println("Pdf generado");
         return "OK";
     }

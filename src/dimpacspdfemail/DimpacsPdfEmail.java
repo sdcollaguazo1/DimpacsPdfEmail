@@ -67,6 +67,7 @@ public class DimpacsPdfEmail {
             }
         } 
         
+        //PROCESO DE REENVIO DE CORREO
         for(LogCorreo logCorreo : listLogCorreo){
             enviarMailLog(logCorreo,urlBackend);
         }

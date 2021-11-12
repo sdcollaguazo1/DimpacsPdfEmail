@@ -179,5 +179,17 @@ public class PdfEmail {
     public void setUrlImagenes(List<String> urlImagenes) {
         this.urlImagenes = urlImagenes;
     }
-   
+  
+    public LogCorreo getLogCorreo(){
+        LogCorreo logCorreo= new LogCorreo();
+        Informe informe = new Informe(this.informeId);
+        
+        logCorreo.setInforme(informe);
+        logCorreo.setDestinatarios(this.pacienteCorreo);
+        logCorreo.setEstado(this.informeEstado);
+        logCorreo.setDetalle("Envio Automatico");
+        logCorreo.setObservacion(this.error);
+        
+        return logCorreo;
+    }
 }

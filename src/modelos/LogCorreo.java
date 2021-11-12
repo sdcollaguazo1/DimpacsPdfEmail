@@ -21,7 +21,8 @@ public class LogCorreo {
     private String imgConvenio;
     private String nombreArchivo;
     private String pacienteNombreApellido;
-
+    private Informe informe;
+    
     public LogCorreo() {
     }
 
@@ -103,6 +104,14 @@ public class LogCorreo {
 
     public void setEmpresaId(Long empresaId) {
         this.empresaId = empresaId;
+    }
+
+    public Informe getInforme() {
+        return informe;
+    }
+
+    public void setInforme(Informe informe) {
+        this.informe = informe;
     }
 
 }

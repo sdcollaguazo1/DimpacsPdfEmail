@@ -37,7 +37,6 @@ public class PdfEmailServicio {
         try {
 
             URL url = new URL(apiDimpacs);
-            BufferedImage image = ImageIO.read(url);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.setRequestProperty("Accept", "application/json");
@@ -86,6 +85,7 @@ public class PdfEmailServicio {
             }
 
         } catch (IOException e) {
+            System.out.println("Error cambiar estatus informe: "+e);
             return e.toString();
         }
 

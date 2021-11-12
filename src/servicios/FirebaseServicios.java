@@ -8,6 +8,7 @@ package servicios;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.Bucket;
+import com.google.cloud.storage.StorageException;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.cloud.StorageClient;
@@ -37,25 +38,27 @@ public class FirebaseServicios {
     private InputStream testFile;
 
     private Blob blob;
-    
+
     private String urlBackend;
 
     public FirebaseServicios(String urlBackend) {
         this.urlBackend = urlBackend;
     }
-    
-    
-    
-    public PdfEmail subirArchivos(ConfiguracionFirebase configuracionFirebase,PdfEmail pdfEmail) {
-        
+
+    public PdfEmail subirArchivos(ConfiguracionFirebase configuracionFirebase, PdfEmail pdfEmail) {
+
         PdfEmailServicio pdfEmailServicio = new PdfEmailServicio(this.urlBackend);
-                
+        LogCorreoServicio logCorreoServicio = new LogCorreoServicio(this.urlBackend);
+
         try {
             refreshToken = new FileInputStream(configuracionFirebase.getRutaArchivo());
         } catch (FileNotFoundException ex) {
             pdfEmail.setInformeEstado("Error");
-            pdfEmail.setError("Error al buscar la ruta del archivo de firebase: "+ex.getMessage());
+            pdfEmail.setError("Error al buscar la ruta del archivo de firebase: " + ex.getMessage());
             pdfEmailServicio.cambiarEstatusInforme(pdfEmail);
+            logCorreoServicio.guardarLogCorreo(pdfEmail.getLogCorreo());
+            System.out.println("Error al buscar la ruta del archivo de firebase: " + ex.getMessage());
+            return null;
         }
 
         try {
@@ -66,29 +69,55 @@ public class FirebaseServicios {
                     .build();
         } catch (IOException ex) {
             pdfEmail.setInformeEstado("Error");
-            pdfEmail.setError("Error al configurar firebase: "+ex.getMessage());
+            pdfEmail.setError("Error al configurar firebase: " + ex.getMessage());
             pdfEmailServicio.cambiarEstatusInforme(pdfEmail);
+            logCorreoServicio.guardarLogCorreo(pdfEmail.getLogCorreo());
+            System.out.println("Error al configurar firebase: " + ex.getMessage());
+            return null;
         }
 
-        defaultApp = FirebaseApp.initializeApp(options);
-
-        bucket = StorageClient.getInstance().bucket();
+        try {
+            defaultApp = FirebaseApp.initializeApp(options);
+            bucket = StorageClient.getInstance().bucket();
+        } catch (IllegalArgumentException ex) {
+            pdfEmail.setInformeEstado("Error");
+            pdfEmail.setError("Error al configurar StorageClient: " + ex.getMessage());
+            pdfEmailServicio.cambiarEstatusInforme(pdfEmail);
+            logCorreoServicio.guardarLogCorreo(pdfEmail.getLogCorreo());
+            System.out.println("Error al configurar StorageClient: " + ex.getMessage());
+            return null;
+        }
         
         try {
             testFile = new FileInputStream(pdfEmail.getRutaArchivo());
         } catch (FileNotFoundException ex) {
             pdfEmail.setInformeEstado("Error");
-            pdfEmail.setError("Error al subir archivos a firebase: "+ex.getMessage());
+            pdfEmail.setError("Archivo no encontrado (firebase): " + ex.getMessage());
             pdfEmailServicio.cambiarEstatusInforme(pdfEmail);
+            logCorreoServicio.guardarLogCorreo(pdfEmail.getLogCorreo());
+            System.out.println("Archivo no encontrado (firebase): " + ex.getMessage());
+            return null;
+        }
+
+        try{
+            blob = bucket.create(pdfEmail.getNombreArchivo(), testFile, Bucket.BlobWriteOption.userProject(configuracionFirebase.getProjectId()));
+        }catch(StorageException ex){
+            pdfEmail.setInformeEstado("Error");
+            pdfEmail.setError("Error al subir archivos a firebase: " + ex);
+            pdfEmailServicio.cambiarEstatusInforme(pdfEmail);
+            logCorreoServicio.guardarLogCorreo(pdfEmail.getLogCorreo());
+            System.out.println("Error al subir archivos a firebase: " + ex);
+            return null;
         }
         
 
-        blob = bucket.create(pdfEmail.getNombreArchivo(), testFile, Bucket.BlobWriteOption.userProject(configuracionFirebase.getProjectId()));
-
-        String link = blob.getMediaLink();
+        String link = "https://docs.google.com/gview?url=https://storage.googleapis.com/"
+                + blob.getBucket() + "/" + blob.getName() + "&embedded=true";
 
         pdfEmail.setUrlArchivo(link);
+        pdfEmail.setInformeEstado("Subido a Firebase");
         pdfEmailServicio.cambiarEstatusInforme(pdfEmail);
+        logCorreoServicio.guardarLogCorreo(pdfEmail.getLogCorreo());
         
         System.out.println("Pdf subido a firebase");
 
