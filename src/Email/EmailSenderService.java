@@ -54,7 +54,7 @@ public class EmailSenderService {
     public void sendEmail(Email email, PdfEmail pdfEmail) {
         PdfEmailServicio pdfEmailServicio = new PdfEmailServicio(this.urlBackend);
         LogCorreoServicio logCorreoServicio = new LogCorreoServicio(this.urlBackend);
-        
+
         Address[] destinatarios = stringToAddress(pdfEmail.getPacienteCorreo(), pdfEmail, pdfEmailServicio);
         Address[] destinatariosCorreoCopia = stringToAddress(email.getCorreoCopiaOculta(), pdfEmail, pdfEmailServicio);
         String asunto = email.getSubject();
@@ -86,7 +86,7 @@ public class EmailSenderService {
             }
 
             if (email.isPacienteAsunto()) {
-                asunto = asunto + " " + pdfEmail.getPacienteNombreApellido();
+                asunto = asunto + " - " + pdfEmail.getPacienteNombreApellido();
             }
 
             message.setSubject(asunto);
@@ -97,7 +97,7 @@ public class EmailSenderService {
             // primera parte mensaje html
             BodyPart messageBodyPart = new MimeBodyPart();
             String htmlText = "<H1>" + email.getSubject() + "</H1>"
-                    + "<img src=\"cid:image\">"
+                    + "<img src=\"cid:logo\">"
                     + "<p>" + email.getMensaje() + "</p>";
 
             //Agregar enlace de firebase en caso de subir
@@ -119,7 +119,8 @@ public class EmailSenderService {
             }
 
             imagenBodyPart.setDataHandler(new DataHandler(fds));
-            imagenBodyPart.setHeader("Content-ID", "<image>");
+            imagenBodyPart.setDisposition(MimeBodyPart.INLINE);
+            imagenBodyPart.setHeader("Content-ID", "<logo>");
             // añadimos la imagen al multipart
             multipart.addBodyPart(imagenBodyPart);
 
@@ -138,7 +139,7 @@ public class EmailSenderService {
                     try {
                         URL url = new URL(img);
                         URLDataSource ds = new URLDataSource(url);
-                       //TODO: VALIDAR QUE SOLAMENTE SE ENVIEN IMAGENES, ERROR AL ENVIAR VIDEOS    
+                        //TODO: VALIDAR QUE SOLAMENTE SE ENVIEN IMAGENES, ERROR AL ENVIAR VIDEOS    
                         BodyPart imagenEstudiosBodyPart = new MimeBodyPart();
                         imagenEstudiosBodyPart.setDataHandler(new DataHandler(ds));
                         imagenEstudiosBodyPart.setFileName("img.jpeg");
