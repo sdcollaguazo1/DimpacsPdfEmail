@@ -12,11 +12,14 @@ import java.io.IOException;
 import modelos.Configuracion;
 import modelos.ConfiguracionFirebase;
 import modelos.Email;
+import modelos.InformeRclinic;
 import modelos.LogCorreo;
 import modelos.PdfEmail;
 import servicios.FirebaseServicios;
+import servicios.InformeRclinicServicio;
 import servicios.LogCorreoServicio;
 import servicios.PdfEmailServicio;
+import servicios.RclinicServicio;
 import servicios.RecuperarEstudiosServicios;
 
 /**
@@ -42,11 +45,13 @@ public class DimpacsPdfEmail {
         PdfEmailServicio pdfEmailServicio = new PdfEmailServicio(urlBackend);
         RecuperarEstudiosServicios recuperarEstudiosServicios = new RecuperarEstudiosServicios(urlBackend);
         LogCorreoServicio logCorreoServicio = new LogCorreoServicio(urlBackend);
+        InformeRclinicServicio informeRclinicServicio = new InformeRclinicServicio(urlBackend);
         
         recuperarEstudiosServicios.getRecuperarEstudios();
         
         PdfEmail[] listPdfEmail = pdfEmailServicio.getListPdfEmail();
         LogCorreo[] listLogCorreo = logCorreoServicio.getLogCorreoEnviar();
+        InformeRclinic[] listInformeRclinic = informeRclinicServicio.getListInformeRclinic();
         
         for (PdfEmail pdfEmail : listPdfEmail) {
             String resultado = "OK";
@@ -70,6 +75,11 @@ public class DimpacsPdfEmail {
         //PROCESO DE REENVIO DE CORREO
         for(LogCorreo logCorreo : listLogCorreo){
             enviarMailLog(logCorreo,urlBackend);
+        }
+        
+        //PROCESO DE ENVIO DE INFORMES A RCLINIC
+        for(InformeRclinic informeRclinic:listInformeRclinic){
+            enviarRclinic(informeRclinic,urlBackend);
         }
             
     }
@@ -110,5 +120,11 @@ public class DimpacsPdfEmail {
         configuracionFirebase = configuracionFirebase.convertirConfiguracionFirebase(listConfiguracionFirebase);
         
         return firebaseServicios.subirArchivos(configuracionFirebase,pdfEmail);
+    }
+    
+    private static void enviarRclinic(InformeRclinic informeRclinic,String urlBackend){
+       
+        RclinicServicio rclinicServicio = new RclinicServicio("http://200.7.192.14:8001/",urlBackend);
+        rclinicServicio.enviarInforme(informeRclinic);
     }
 }

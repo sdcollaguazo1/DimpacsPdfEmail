@@ -96,15 +96,19 @@ public class EmailSenderService {
 
             // primera parte mensaje html
             BodyPart messageBodyPart = new MimeBodyPart();
-            String htmlText = "<H1>" + email.getSubject() + "</H1>"
-                    + "<img src=\"cid:logo\">"
-                    + "<p>" + email.getMensaje() + "</p>";
-
+            String htmlText = "";
+            htmlText = "<H1>" + email.getSubject() + "</H1>";
+                        
+            htmlText = htmlText + "<img src=\"cid:logo\">";
+            
             //Agregar enlace de firebase en caso de subir
             if (pdfEmail.isSubirFirebase()) {
                 htmlText = htmlText
-                        + "<a href=\"" + pdfEmail.getUrlArchivo() + "\" target=\"_blank\" rel=\"noopener noreferrer\">VISUALIZAR INFORME</a>";
+                        + "<h3><b><a href=\"" + pdfEmail.getUrlArchivo() + "\" target=\"_blank\" rel=\"noopener noreferrer\">VISUALIZAR INFORME</a> </b> </h3>";
             }
+            
+            htmlText = htmlText + "<p>" + email.getMensaje() + "</p>";
+            
             messageBodyPart.setContent(htmlText, "text/html");
             // Añadimos el hml al multipart
             multipart.addBodyPart(messageBodyPart);

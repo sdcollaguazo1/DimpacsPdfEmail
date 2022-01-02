@@ -12,21 +12,22 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import modelos.LogCorreo;
+import modelos.InformeRclinic;
+import modelos.LogInformeRclinic;
+
 /**
  *
  * @author digetbi
  */
-public class LogCorreoServicio {
-
+public class InformeRclinicServicio {
     String apiDimpacs = "";
 
-    public LogCorreoServicio(String urlBackend) {
-        this.apiDimpacs = urlBackend + "api/logCorreo";
+    public InformeRclinicServicio(String urlBackend) {
+        this.apiDimpacs = urlBackend+"api/informeRclinic";
     }
-
-    public LogCorreo[] getLogCorreoEnviar() {
-        LogCorreo[] logCorreoEnviar = null;
+    
+    public InformeRclinic[] getListInformeRclinic() {
+        InformeRclinic[] listInformeRclinic = null;
         Gson g = new Gson();
         try {
 
@@ -41,57 +42,23 @@ public class LogCorreoServicio {
                 String output;
 
                 while ((output = br.readLine()) != null) {
-                    logCorreoEnviar = g.fromJson(output, LogCorreo[].class);
+                    listInformeRclinic = g.fromJson(output, InformeRclinic[].class);
                 }
             }
         } catch (IOException e) {
-            System.out.println(e.getMessage());
+            System.out.println(e);
         }
-        return logCorreoEnviar;
+        return listInformeRclinic;
     }
     
-        public String cambiarEstadoLogCorreo(LogCorreo logCorreo) {
+    public void logInformeRclinic(LogInformeRclinic LogInformeRclinic){
         String resultado = "";
+        
         Gson g = new Gson();
-        String json = g.toJson(logCorreo);
-
+        String json = g.toJson(LogInformeRclinic);
+        
         try {
-            URL url = new URL(apiDimpacs);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("PUT");
-            conn.setRequestProperty("Content-Type", "application/json; utf-8");
-            conn.setDoOutput(true);
-            conn.setDoInput(true);
-
-            try (OutputStream os = conn.getOutputStream()) {
-                byte[] input = json.getBytes("utf-8");
-                os.write(input, 0, input.length);
-            }
-
-            try (BufferedReader br = new BufferedReader(
-                    new InputStreamReader(conn.getInputStream(), "utf-8"))) {
-                StringBuilder response = new StringBuilder();
-                String responseLine = null;
-                while ((responseLine = br.readLine()) != null) {
-                    response.append(responseLine.trim());
-                }
-                resultado = response.toString();
-            }
-
-        } catch (IOException e) {
-            return e.toString();
-        }
-
-        return resultado;
-    }
-    
-    public String guardarLogCorreo(LogCorreo logCorreo) {
-        String resultado = "";
-        Gson g = new Gson();
-        String json = g.toJson(logCorreo);
-
-        try {
-            URL url = new URL(apiDimpacs);
+            URL url = new URL(apiDimpacs+"/log");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json; utf-8");
@@ -114,9 +81,7 @@ public class LogCorreoServicio {
             }
 
         } catch (IOException e) {
-            return e.toString();
+            System.out.println(e);
         }
-
-        return resultado;
     }
 }
