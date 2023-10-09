@@ -123,8 +123,8 @@ public class DimpacsPdfEmail {
     }
     
     private static void enviarRclinic(InformeRclinic informeRclinic,String urlBackend){
-       
-        RclinicServicio rclinicServicio = new RclinicServicio("http://200.7.192.14:8001/",urlBackend);
+        
+        RclinicServicio rclinicServicio = new RclinicServicio("http://192.168.200.218/",urlBackend);
         rclinicServicio.enviarInforme(informeRclinic);
     }
 }

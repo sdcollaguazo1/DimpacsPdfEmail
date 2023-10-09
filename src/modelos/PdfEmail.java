@@ -44,6 +44,8 @@ public class PdfEmail {
     
     private boolean guardarInforme;
     
+    private int reintento;
+    
     private List<String>urlImagenes;
 	
     
@@ -179,7 +181,15 @@ public class PdfEmail {
     public void setUrlImagenes(List<String> urlImagenes) {
         this.urlImagenes = urlImagenes;
     }
-  
+    
+    public int getReintento() {
+        return reintento;
+    }
+
+    public void setReintento(int reintento) {
+        this.reintento = reintento;
+    }
+        
     public LogCorreo getLogCorreo(){
         LogCorreo logCorreo= new LogCorreo();
         Informe informe = new Informe(this.informeId);
@@ -189,6 +199,7 @@ public class PdfEmail {
         logCorreo.setEstado(this.informeEstado);
         logCorreo.setDetalle("Envio Automatico");
         logCorreo.setObservacion(this.error);
+        logCorreo.setReintento(this.reintento);
         
         return logCorreo;
     }

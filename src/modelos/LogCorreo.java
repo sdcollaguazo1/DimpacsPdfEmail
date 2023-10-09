@@ -22,7 +22,8 @@ public class LogCorreo {
     private String nombreArchivo;
     private String pacienteNombreApellido;
     private Informe informe;
-    
+    private int reintento;
+
     public LogCorreo() {
     }
 
@@ -113,5 +114,13 @@ public class LogCorreo {
     public void setInforme(Informe informe) {
         this.informe = informe;
     }
+    
+      public int getReintento() {
+        return reintento;
+    }
 
+    public void setReintento(int reintento) {
+        this.reintento = reintento;
+    }
+    
 }
