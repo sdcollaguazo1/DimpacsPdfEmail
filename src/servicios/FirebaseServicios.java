@@ -58,7 +58,7 @@ public class FirebaseServicios {
             pdfEmailServicio.cambiarEstatusInforme(pdfEmail);
             logCorreoServicio.guardarLogCorreo(pdfEmail.getLogCorreo());
             System.out.println("Error al buscar la ruta del archivo de firebase: " + ex.getMessage());
-            return null;
+            return pdfEmail;
         }
 
         try {
@@ -73,7 +73,7 @@ public class FirebaseServicios {
             pdfEmailServicio.cambiarEstatusInforme(pdfEmail);
             logCorreoServicio.guardarLogCorreo(pdfEmail.getLogCorreo());
             System.out.println("Error al configurar firebase: " + ex.getMessage());
-            return null;
+            return pdfEmail;
         }
 
         try {
@@ -85,7 +85,14 @@ public class FirebaseServicios {
             pdfEmailServicio.cambiarEstatusInforme(pdfEmail);
             logCorreoServicio.guardarLogCorreo(pdfEmail.getLogCorreo());
             System.out.println("Error al configurar StorageClient: " + ex.getMessage());
-            return null;
+            return pdfEmail;
+        } catch (IllegalStateException ex){
+            pdfEmail.setInformeEstado("Error");
+            pdfEmail.setError("Error al configurar StorageClient: " + ex.getMessage());
+            pdfEmailServicio.cambiarEstatusInforme(pdfEmail);
+            logCorreoServicio.guardarLogCorreo(pdfEmail.getLogCorreo());
+            System.out.println("Error al configurar StorageClient: " + ex.getMessage());
+            return pdfEmail;
         }
         
         try {
@@ -96,7 +103,7 @@ public class FirebaseServicios {
             pdfEmailServicio.cambiarEstatusInforme(pdfEmail);
             logCorreoServicio.guardarLogCorreo(pdfEmail.getLogCorreo());
             System.out.println("Archivo no encontrado (firebase): " + ex.getMessage());
-            return null;
+            return pdfEmail;
         }
 
         try{
@@ -107,7 +114,7 @@ public class FirebaseServicios {
             pdfEmailServicio.cambiarEstatusInforme(pdfEmail);
             logCorreoServicio.guardarLogCorreo(pdfEmail.getLogCorreo());
             System.out.println("Error al subir archivos a firebase: " + ex);
-            return null;
+            return pdfEmail;
         }
         
 

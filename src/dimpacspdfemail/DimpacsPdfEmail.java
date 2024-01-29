@@ -65,7 +65,8 @@ public class DimpacsPdfEmail {
                     pdfEmail = subirArchivos(pdfEmail,urlBackend);
                 }
                 
-                if (pdfEmail.isEnviarCorreo()) {
+                boolean existError = pdfEmail.getError() != null;
+                if (pdfEmail.isEnviarCorreo() && !existError) {
                     enviarEmail(pdfEmail,urlBackend);                                     
                 }
 
