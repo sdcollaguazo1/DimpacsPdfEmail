@@ -77,7 +77,12 @@ public class FirebaseServicios {
         }
 
         try {
-            defaultApp = FirebaseApp.initializeApp(options);
+            if (FirebaseApp.getApps().size() > 0) {
+                defaultApp = FirebaseApp.initializeApp(options);
+             }else {
+                defaultApp = FirebaseApp.getApps().get(0); // if already initialized, use that one
+             }
+            //defaultApp = FirebaseApp.initializeApp(options);
             bucket = StorageClient.getInstance().bucket();
         } catch (IllegalArgumentException ex) {
             pdfEmail.setInformeEstado("Error");
